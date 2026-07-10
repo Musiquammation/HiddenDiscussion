@@ -73,16 +73,36 @@ window.Chat = (function () {
   }
 
   function handleAuthOk(data) {
+    // 1. Update the list of currently connected users
     connectedUsers.clear();
     for (const name of data.connectedUsers) connectedUsers.add(name);
     renderConnectedUsers();
 
+    // 2. Process the connection/disconnection history
+    if (data.connections) {
+      for (const conn of data.connections) {
+        const action = conn.event === "left" ? "disconnected" : "connected";
+
+        // Use Storage.addMessage directly to preserve the server-generated id and timestamp
+        Storage.addMessage(forumEntry.key, {
+          id: conn.id,
+          type: "system",
+          text: `${conn.participant} ${action}`,
+          date: conn.date
+        });
+      }
+    }
+
+    // 3. Process missed messages
     for (const missed of data.missedMessages) {
       Storage.addMessage(forumEntry.key, missed);
     }
+
+    // 4. Load the complete message history and render it
     entries = Storage.getMessages(forumEntry.key);
     renderMessages();
 
+    // 5. Update the typing indicators
     currentlyTyping.clear();
     for (const name of data.typingUsers) {
       if (name !== forumEntry.username) currentlyTyping.add(name);
