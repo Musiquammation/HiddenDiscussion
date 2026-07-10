@@ -13,7 +13,7 @@
     <header class="app-header">
       <h1>Hidden Discussion</h1>
       <div class="home-actions">
-        <button type="button" id="open-create-forum" class="primary">+ New forum</button>
+        <button type="button" id="open-create-forum" class="primary">New forum</button>
         <button type="button" id="open-join-forum" class="primary">Join forum</button>
       </div>
     </header>
@@ -29,7 +29,11 @@
   <!-- ============ CREATE FORUM VIEW ============ -->
   <section id="view-create-forum" class="view">
     <header class="app-header">
-      <button type="button" id="back-from-create" class="icon-button" title="Back">&larr;</button>
+      <button type="button" id="back-from-create" class="icon-button" title="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <path d="M14 7L9 12L14 17"></path>
+        </svg>
+      </button>
       <h1>New forum</h1>
     </header>
 
@@ -60,12 +64,16 @@
   <!-- ============ CHAT VIEW ============ -->
   <section id="view-chat" class="view">
     <header class="chat-header">
-      <button type="button" id="back-to-home" class="icon-button" title="Back">&larr;</button>
+      <button type="button" id="back-to-home" class="icon-button" title="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <path d="M14 7L9 12L14 17"></path>
+        </svg>
+      </button>
       <div class="chat-header-text">
         <h2 id="chat-title">Forum</h2>
         <p id="chat-subtitle" class="chat-subtitle"></p>
       </div>
-      <div id="connected-users" class="connected-users"></div>
+      <div id="participants"></div>
     </header>
 
     <div id="messages" class="messages"></div>

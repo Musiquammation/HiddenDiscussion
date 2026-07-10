@@ -3,6 +3,7 @@
 // between messages that existed before this session and new ones.
 
 window.Chat = (function () {
+  let allUsers = new Set();
   let socket = null;
   let forumEntry = null; // { key, username, forumName }
   let entries = []; // messages + system notes for this forum, mirrors localStorage
@@ -74,9 +75,13 @@ window.Chat = (function () {
 
   function handleAuthOk(data) {
     // 1. Update the list of currently connected users
+    allUsers.clear();
+    for (const name of data.participants) allUsers.add(name);
+
     connectedUsers.clear();
     for (const name of data.connectedUsers) connectedUsers.add(name);
-    renderConnectedUsers();
+
+    renderConnectedUsers(true);
 
     // 2. Process the connection/disconnection history
     if (data.connections) {
@@ -186,8 +191,33 @@ window.Chat = (function () {
 
   // ---- Rendering ----
 
-  function renderConnectedUsers() {
-    document.getElementById("connected-users").textContent = [...connectedUsers].sort().join(", ");
+  function renderConnectedUsers(first = false) {
+    const div = document.getElementById("participants");
+
+    if (first) {
+      div.innerHTML = "";
+      for (const name of [...allUsers].sort()) {
+        const child = document.createElement("span");
+        child.innerText = name;
+        child.classList.add("participant");
+
+        if (connectedUsers.has(name)) {
+          child.classList.add("connected");
+        }
+
+        div.appendChild(child);
+      }
+
+      return;
+    }
+
+    const sorted = [...allUsers].sort();
+    for (let i = 0; i < sorted.length; i++) {
+      div.children[i].classList.toggle(
+        "connected",
+        connectedUsers.has(sorted[i])
+      );
+    }
   }
 
   function renderMessages() {
@@ -254,14 +284,14 @@ window.Chat = (function () {
 
     const displayName = note.participant === forumEntry.username ?
       "You" : note.participant;
-    let htmlClass = note.action === "connected" ? "green" : "red";
-    if (note.participant === forumEntry.username) {
-      htmlClass += " you";
-    }
+    const htmlClass = note.action === "connected" ? "green" : "red";
+    
+    const nameClass = note.participant === forumEntry.username ?
+      "you" : "";
 
     el.innerHTML = `
       <span class="${htmlClass}">
-        <span>${escapeHtml(displayName)}</span>
+        <span class=${nameClass}>${escapeHtml(displayName)}</span>
         <span>${escapeHtml(note.action)}</span>
       </span>
       <span> · </span>
