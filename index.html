@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Instant Messenger</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ============ HOME VIEW ============ -->
+  <section id="view-home" class="view">
+    <header class="app-header">
+      <h1>Instant Messenger</h1>
+      <div class="home-actions">
+        <button type="button" id="open-create-forum" class="primary">+ New forum</button>
+        <button type="button" id="open-join-forum" class="primary">Join forum</button>
+      </div>
+    </header>
+
+    <main class="home-grid">
+      <section class="card forum-list-card">
+        <h2>Your forums</h2>
+        <div id="forum-list" class="forum-list"></div>
+      </section>
+    </main>
+  </section>
+
+  <!-- ============ CREATE FORUM VIEW ============ -->
+  <section id="view-create-forum" class="view">
+    <header class="app-header">
+      <button type="button" id="back-from-create" class="icon-button" title="Back">&larr;</button>
+      <h1>New forum</h1>
+    </header>
+
+    <main class="home-grid single">
+      <section class="card">
+        <form id="create-forum-form">
+          <label>
+            Forum name
+            <input type="text" id="create-forum-name" placeholder="e.g. Project Team" required />
+          </label>
+
+          <div id="participant-fields" class="participant-fields"></div>
+          <button type="button" id="add-participant" class="secondary">+ Add participant</button>
+
+          <button type="submit" class="primary">Create forum</button>
+        </form>
+
+        <div id="created-keys-panel" class="created-keys-panel hidden">
+          <h3 id="created-keys-title">Keys</h3>
+          <p class="hint">Copy these keys now and share one with each participant — they won't be shown again.</p>
+          <ul id="created-keys-list"></ul>
+          <button type="button" id="close-created-keys" class="secondary">Done</button>
+        </div>
+      </section>
+    </main>
+  </section>
+
+  <!-- ============ CHAT VIEW ============ -->
+  <section id="view-chat" class="view">
+    <header class="chat-header">
+      <button type="button" id="back-to-home" class="icon-button" title="Back">&larr;</button>
+      <div class="chat-header-text">
+        <h2 id="chat-title">Forum</h2>
+        <p id="chat-subtitle" class="chat-subtitle"></p>
+      </div>
+      <div id="connected-users" class="connected-users"></div>
+    </header>
+
+    <div id="messages" class="messages"></div>
+
+    <div id="typing-indicator" class="typing-indicator"></div>
+
+    <form id="message-form" class="message-form">
+      <input type="text" id="message-input" placeholder="Type a message…" autocomplete="off" />
+      <button type="submit" class="primary">Send</button>
+    </form>
+  </section>
+
+  <script src="js/url.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/home.js"></script>
+  <script src="js/chat.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
