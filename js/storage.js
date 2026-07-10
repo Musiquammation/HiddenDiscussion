@@ -61,17 +61,18 @@ window.Storage = (function () {
   // A "connected"/"disconnected" notice. Stored in the same array as chat
   // messages (tagged with type: "system") so it replays in order next time
   // the conversation is reopened, instead of only living in the DOM.
-  function addSystemNote(participantKey, text) {
+  function addSystemNote(participantKey, participant, action) {
     const entries = getMessages(participantKey);
     const note = {
       type: "system",
       id: `sys-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-      text,
+      participant,
+      action,
       date: new Date().toISOString(),
     };
     entries.push(note);
     entries.sort((a, b) => new Date(a.date) - new Date(b.date));
-    saveMessages(participantKey, entries);
+    saveMessages(participantKey, entries); // ou Storage.saveMessages(...)
     return note;
   }
 

@@ -83,11 +83,11 @@ window.Chat = (function () {
       for (const conn of data.connections) {
         const action = conn.event === "left" ? "disconnected" : "connected";
 
-        // Use Storage.addMessage directly to preserve the server-generated id and timestamp
         Storage.addMessage(forumEntry.key, {
           id: conn.id,
           type: "system",
-          text: `${conn.participant} ${action}`,
+          participant: conn.participant,
+          action: action,
           date: conn.date
         });
       }
@@ -122,9 +122,11 @@ window.Chat = (function () {
     if (!data.connected) currentlyTyping.delete(data.username);
     renderTypingUsers();
 
+    const action = data.connected ? "connected" : "disconnected";
     const note = Storage.addSystemNote(
       forumEntry.key,
-      `${data.username} ${data.connected ? "connected" : "disconnected"}`
+      data.username,
+      action
     );
     appendSystemNote(note);
   }
@@ -249,7 +251,23 @@ window.Chat = (function () {
     const el = document.createElement("div");
     el.className = "system-note";
     el.dataset.id = note.id;
-    el.textContent = `${note.text} · ${formatTime(note.date)}`;
+
+    const displayName = note.participant === forumEntry.username ?
+      "You" : note.participant;
+    let htmlClass = note.action === "connected" ? "green" : "red";
+    if (note.participant === forumEntry.username) {
+      htmlClass += " you";
+    }
+
+    el.innerHTML = `
+      <span class="${htmlClass}">
+        <span>${escapeHtml(displayName)}</span>
+        <span>${escapeHtml(note.action)}</span>
+      </span>
+      <span> · </span>
+      <span>${formatTime(note.date)}</span>
+    `;
+    
     container.appendChild(el);
     container.scrollTop = container.scrollHeight;
   }
