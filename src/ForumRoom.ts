@@ -5,7 +5,8 @@
 import WebSocket from "ws";
 import { getLogger } from "./Logger";
 import { getForumById, getParticipantsByForum, updateLastVisit } from "./db";
-import { ChatMessagePayload, ServerMessage } from "./types";
+import { ChatMessagePayload, ConnectionEvent, ServerMessage } from "./types";
+import { randomUUID } from "crypto";
 
 const logger = getLogger("ForumRoom");
 
@@ -15,6 +16,15 @@ const FORUM_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 /** A message kept server-side because at least one participant was offline when it was sent. */
 interface PendingMessage extends ChatMessagePayload {
   deliveredTo: Set<string>; // participant keys who already have this message
+}
+
+/** Un événement d'entrée/sortie gardé côté serveur tant que tout le monde ne l'a pas "vu". */
+interface PendingConnectionEvent {
+  id: string;
+  participant: string;
+  date: string;
+  event: "joined" | "left";
+  deliveredTo: Set<string>; // participant keys qui ont déjà vu cet événement
 }
 
 /** A participant that is currently connected to this forum. */
@@ -39,6 +49,9 @@ export class ForumRoom {
 
   /** Messages not yet acknowledged by every participant of the forum. */
   private pendingMessages = new Map<string, PendingMessage>();
+
+  /** Événements de connexion pas encore vus par tous les participants du forum. */
+  private pendingConnections = new Map<string, PendingConnectionEvent>();
 
   private expiryTimer: NodeJS.Timeout | null = null;
   private readonly onExpire: (forumId: number) => void;
@@ -97,6 +110,7 @@ export class ForumRoom {
   addConnection(key: string, name: string, socket: WebSocket) {
     this.connected.set(key, { key, name, socket });
     logger.debug(`"${name}" is now connected to forum "${this.name}" (${this.connected.size} connected total)`);
+    this.recordConnectionEvent(key, "joined");
     this.touch();
   }
 
@@ -105,6 +119,7 @@ export class ForumRoom {
     this.connected.delete(key);
     this.typingUsers.delete(key);
     updateLastVisit(key, new Date());
+    this.recordConnectionEvent(key, "left");
     this.touch();
   }
 
@@ -123,15 +138,50 @@ export class ForumRoom {
     return [...this.typingUsers].map((key) => this.allParticipants.get(key)).filter((n): n is string => !!n);
   }
 
-  /** lastVisit map (name -> ISO date | null) for participants who are NOT currently connected. */
-  offlineLastVisits(lastVisitByKey: Map<string, string | null>): Record<string, string | null> {
-    const result: Record<string, string | null> = {};
-    for (const [key, name] of this.allParticipants) {
-      if (!this.connected.has(key)) {
-        result[name] = lastVisitByKey.get(key) ?? null;
-      }
+  /** Enregistre un événement d'entrée/sortie, à conserver tant que tous ne l'ont pas vu. */
+  private recordConnectionEvent(key: string, event: "joined" | "left") {
+    const name = this.allParticipants.get(key)!;
+    const pending: PendingConnectionEvent = {
+      id: randomUUID(),
+      participant: name,
+      date: new Date().toISOString(),
+      event,
+      deliveredTo: new Set(this.connected.keys()), // ceux déjà connectés le voient tout de suite (live via broadcastPresence)
+    };
+
+    const everyoneConnected = pending.deliveredTo.size >= this.allParticipants.size;
+    if (!everyoneConnected) {
+      this.pendingConnections.set(pending.id, pending);
+      logger.debug(`Stored connection event ${pending.id} (${name} ${event}) in forum "${this.name}"`);
     }
-    return result;
+  }
+
+  /** Événements de connexion que ce participant n'a pas encore vus. */
+  missedConnectionsFor(key: string): ConnectionEvent[] {
+    const missed: ConnectionEvent[] = [];
+    for (const evt of this.pendingConnections.values()) {
+      if (!evt.deliveredTo.has(key)) missed.push(this.toConnectionPayload(evt));
+    }
+    return missed;
+  }
+
+  private toConnectionPayload(evt: PendingConnectionEvent): ConnectionEvent {
+    return { id: evt.id, participant: evt.participant, date: evt.date, event: evt.event };
+  }
+
+  private markConnectionDelivered(evt: PendingConnectionEvent, key: string) {
+    evt.deliveredTo.add(key);
+    if (evt.deliveredTo.size >= this.allParticipants.size) {
+      this.pendingConnections.delete(evt.id);
+      logger.debug(`Connection event ${evt.id} was now seen by everyone, dropping it from forum "${this.name}"`);
+    }
+  }
+
+  /** Marque tous les événements de connexion actuellement manqués comme vus pour `key`. */
+  deliverMissedConnections(key: string) {
+    for (const evt of [...this.pendingConnections.values()]) {
+      if (!evt.deliveredTo.has(key)) this.markConnectionDelivered(evt, key);
+    }
   }
 
   /** Messages this participant has not received yet. */
@@ -217,9 +267,9 @@ export class ForumRoom {
 
   /** True once the room has no connected clients and no pending messages left. */
   isEmpty(): boolean {
-    return this.connected.size === 0 && this.pendingMessages.size === 0;
+    return this.connected.size === 0 && this.pendingMessages.size === 0 && this.pendingConnections.size === 0;
   }
-
+  
   dispose() {
     if (this.expiryTimer) clearTimeout(this.expiryTimer);
   }

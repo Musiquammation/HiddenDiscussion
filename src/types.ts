@@ -39,10 +39,17 @@ export type ServerMessage =
       missedMessages: ChatMessagePayload[];
       typingUsers: string[];
       connectedUsers: string[];
-      // Display name -> last visit ISO date (or null), for participants who are offline.
-      lastVisits: Record<string, string | null>;
+      connections: ConnectionEvent[]
     }
   | { type: "authError"; reason: string }
   | { type: "presence"; username: string; connected: boolean }
   | { type: "message"; message: ChatMessagePayload }
   | { type: "typing"; username: string; typing: boolean };
+
+
+export interface ConnectionEvent {
+  id: string;
+  participant: string;
+  date: string; // ISO
+  event: "joined" | "left";
+}

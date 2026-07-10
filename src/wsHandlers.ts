@@ -95,10 +95,6 @@ function handleAuth(socket: WebSocket, state: SocketState, key: string) {
     return;
   }
 
-  // Snapshot the lastVisit dates of everyone currently offline, before we add ourselves.
-  const allRows = getParticipantsByForum(room.id);
-  const lastVisitByKey = new Map(allRows.map((p) => [p.key, p.lastVisit]));
-
   room.addConnection(key, participant.name, socket);
   state.authenticated = true;
   state.key = key;
@@ -107,14 +103,17 @@ function handleAuth(socket: WebSocket, state: SocketState, key: string) {
   const missedMessages = room.missedMessagesFor(key);
   room.deliverMissedMessages(key);
 
+  const connections = room.missedConnectionsFor(key);
+  room.deliverMissedConnections(key);
+
   send(socket, {
     type: "authOk",
     forumName: room.name,
     username: participant.name,
     missedMessages,
+    connections,
     typingUsers: room.typingNames(),
     connectedUsers: room.connectedNames(),
-    lastVisits: room.offlineLastVisits(lastVisitByKey),
   });
 
   logger.info(`Participant "${participant.name}" connected to forum "${room.name}" (id=${room.id})`);
