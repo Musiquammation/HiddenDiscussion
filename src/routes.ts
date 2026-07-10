@@ -5,7 +5,7 @@ import { Router } from "express";
 import { getLogger } from "./Logger";
 import { createForum, getParticipantByKey, getForumById } from "./db";
 
-const logger = getLogger("routes");
+const logger = getLogger("ROUTES");
 export const router = Router();
 
 router.post("/forum", (req, res) => {

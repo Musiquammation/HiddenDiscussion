@@ -7,7 +7,7 @@ import crypto from "crypto";
 import { getLogger } from "./Logger";
 import { ForumRow, ParticipantRow } from "./types";
 
-const logger = getLogger("db");
+const logger = getLogger("DATABASE");
 
 const dbFile = process.env.DB_FILE;
 if (!dbFile) {

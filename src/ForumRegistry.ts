@@ -5,7 +5,7 @@
 import { getLogger } from "./Logger";
 import { ForumRoom } from "./ForumRoom";
 
-const logger = getLogger("ForumRegistry");
+const logger = getLogger("FORUM_REGISTRY");
 
 class ForumRegistry {
   private forums = new Map<number, ForumRoom>();

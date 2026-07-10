@@ -9,7 +9,7 @@ import { forumRegistry } from "./ForumRegistry";
 import { ForumRoom } from "./ForumRoom";
 import { ClientMessage, ServerMessage } from "./types";
 
-const logger = getLogger("ws");
+const logger = getLogger("WS");
 
 // Tracks the authenticated identity attached to each open socket.
 interface SocketState {

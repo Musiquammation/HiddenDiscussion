@@ -8,7 +8,7 @@ import { getForumById, getParticipantsByForum, updateLastVisit } from "./db";
 import { ChatMessagePayload, ConnectionEvent, ServerMessage } from "./types";
 import { randomUUID } from "crypto";
 
-const logger = getLogger("ForumRoom");
+const logger = getLogger("FORUM_ROOM");
 
 // How long a forum may sit untouched in RAM before being garbage collected.
 const FORUM_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 7 days

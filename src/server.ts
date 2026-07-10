@@ -10,7 +10,7 @@ import { getLogger } from "./Logger";
 import { router } from "./routes";
 import { handleConnection } from "./wsHandlers";
 
-const logger = getLogger("server");
+const logger = getLogger("SERVER");
 
 const PORT = Number(process.env.PORT) || 3000;
 
