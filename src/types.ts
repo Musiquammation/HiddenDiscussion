@@ -39,6 +39,7 @@ export type ServerMessage =
       missedMessages: ChatMessagePayload[];
       typingUsers: string[];
       connectedUsers: string[];
+      participants: string[];
       connections: ConnectionEvent[]
     }
   | { type: "authError"; reason: string }

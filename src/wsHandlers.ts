@@ -114,6 +114,7 @@ function handleAuth(socket: WebSocket, state: SocketState, key: string) {
     connections,
     typingUsers: room.typingNames(),
     connectedUsers: room.connectedNames(),
+    participants: room.getParticipantsNames()
   });
 
   logger.info(`Participant "${participant.name}" connected to forum "${room.name}" (id=${room.id})`);

@@ -243,6 +243,10 @@ export class ForumRoom {
     this.touch();
   }
 
+  getParticipantsNames(): string[] {
+    return [...this.allParticipants.values()];
+  }
+
   /** Sends a presence update (connect/disconnect) to every connected participant. */
   broadcastPresence(username: string, connectedFlag: boolean) {
     this.broadcast({ type: "presence", username, connected: connectedFlag });
