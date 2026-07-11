@@ -58,7 +58,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
@@ -86,7 +86,7 @@ body {
 
 .view {
   display: none;
-  height: 100vh;
+  height: 100dvh;
 }
 
 .view.active {
@@ -178,7 +178,15 @@ form label {
   margin-bottom: 14px;
 }
 
-form input[type="text"] {
+
+textarea {
+  resize: none;
+  font-family: inherit;
+}
+
+form input[type="text"],
+form textarea
+{
   display: block;
   width: 100%;
   margin-top: 8px;
@@ -192,7 +200,9 @@ form input[type="text"] {
   outline: none;
 }
 
-form input[type="text"]:focus {
+form input[type="text"]:focus 
+form textarea:focus 
+{
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-dim);
 }
@@ -390,6 +400,7 @@ button.secondary:hover {
   background: var(--panel);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
   z-index: 10;
+  padding-top: calc(16px + env(safe-area-inset-top));
 }
 
 .icon-button {
@@ -570,6 +581,8 @@ button.secondary:hover {
   border-top: 1px solid var(--border);
   background: var(--panel);
   z-index: 10;
+  padding: 16px 24px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
 }
 
 .message-form input {
@@ -611,10 +624,6 @@ button.secondary:hover {
   .bubble {
     max-width: 85%;
   }
-  
-  .message-form {
-    padding: 12px 16px;
-  }
 }
 
 .green {
@@ -626,3 +635,4 @@ button.secondary:hover {
   color: var(--base-red);
   font-weight: 500;
 }
+

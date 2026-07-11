@@ -31,7 +31,11 @@ window.Chat = (function () {
 
     document.getElementById("chat-title").textContent = entry.forumName;
     document.getElementById("chat-subtitle").textContent = `Connected as ${entry.username}`;
-    document.getElementById("typing-indicator").textContent = "";
+
+    const ti = document.getElementById("typing-indicator");
+    ti.textContent = "";
+    ti.classList.add("hidden");
+    
     renderConnectedUsers();
     renderMessages();
 
@@ -273,7 +277,15 @@ window.Chat = (function () {
   function renderTypingUsers() {
     const el = document.getElementById("typing-indicator");
     const names = [...currentlyTyping];
-    el.textContent = names.length > 0 ? `${names.join(", ")} typing…` : "";
+    if (names.length > 0) {
+      el.textContent = names.join(", ") + " typing…";
+      console.log("hide");
+      el.classList.remove("hidden");
+    } else {
+      el.textContent = "";
+      console.log("show");
+      el.classList.add("hidden");
+    }
   }
 
   function appendSystemNote(note) {
@@ -315,7 +327,17 @@ window.Chat = (function () {
       sendMessage(input.value);
       input.value = "";
     });
-    document.getElementById("message-input").addEventListener("input", handleTypingInput);
+    
+    const input = document.getElementById("message-input");
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage(input.value);
+        input.value = "";
+      } 
+    });
+
+    input.addEventListener("input", handleTypingInput);
     document.getElementById("back-to-home").addEventListener("click", () => Main.goHome());
   }
 
